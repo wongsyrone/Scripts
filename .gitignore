@@ -4,3 +4,6 @@
 .gitignore~
 .gitkeep~
 
+# toolkit data files and no need to track
+adb-myself-toolkit/apks/*.apk
+adb-myself-toolkit/rom-zip/*.zip
