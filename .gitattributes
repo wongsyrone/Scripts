@@ -5,12 +5,14 @@
 *.sh text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
+adb-myself-toolkit/*.md text eol=lf
 
 # files for Windows, we need crlf
 fix-vac-tool/*.cmd text eol=crlf
 fix-vac-tool/*.txt text eol=crlf
 
 adb-myself-toolkit/*.bat text eol=crlf
+adb-myself-toolkit/data/VERSION text eol=crlf
 
 # Binary files
 *.exe binary
