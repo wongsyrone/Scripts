@@ -1,9 +1,10 @@
 ﻿@echo off
 cd /D %~dp0
-echo  只用于豌豆荚导出的apk的自动安装，保存在apks文件夹中
-echo  必须去除中文名称，已下划线为分隔符
-echo  分成三段，去除第一段的描述，如果有例外情况需要手工修改
-echo  确认没有中文就可以安装了
+echo  Caution:  Must use ANSI encoding to function well on Windows. (This is dedicated for Windows BTW
+echo  This script only support installing apks in apks/ folder, which are exported using Wandoujia
+echo  You must clean up Chinese characters to make it work. 
+echo  In general, file names are seperated into three or four parts by underline(_), and the first part contains Chinese chars.
+echo  You can continue the procedure if have confirmed there are no Chinese chars.
 echo -----------Press any key
 echo.
 pause & break
@@ -14,8 +15,10 @@ taskkill /f /im "wandoujia2.exe" 2>nul
 taskkill /f /im "wandoujia_helper.exe" 2>nul
 taskkill /f /im "tadb.exe" 2>nul
 :: only for Apps export via Wandoujia
-:: Divided by three parts and drop the first part
+if exist apks\no_chinese_char goto :go
 
+:dealwithch
+:: Divided by three parts and drop the first part
 for /f "tokens=1,2,3* delims=_" %%a in ('dir /a /b apks\*.apk') DO (
 cd apks
 ren "%%a_%%b_%%c" "%%b_%%c" 2>nul
@@ -27,7 +30,10 @@ cd apks
 ren "%%e_%%f_%%g_%%h" "%%f_%%g_%%h" 2>nul
 cd ..
 )
+copy nul apks\no_chinese_char 2>nul
+goto :go
 
+:go
 echo  Preparing ADB
 data\adb.exe kill-server
 ping -n 3 127.0.0.1 >nul
