@@ -1,4 +1,13 @@
 #! /bin/sh
+
+X="/usr/bin/X"
+Xorg="/usr/bin/Xorg"
+
+if [ ! -f "$X" -o ! -f "$Xorg" ] ; then
+    echo "You must have Xorg-server installed!"
+    exit 1
+fi
+
 if ! which synclient > /dev/null ; then
     echo "synclient not found. Plz reinstall touchpad driver."
     exit 1
