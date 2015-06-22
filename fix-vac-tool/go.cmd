@@ -184,7 +184,7 @@ IF NOT EXIST "!CAFE!\bin\steamservice.exe" goto NOSTEAM
 echo -----清除appcache文件夹
 :: 清除appcache
 set /p="清除appcache文件夹..." <nul
-rd /s /q "%RootPath%\appcache" >nul 2>nul
+rd /s /q "!CAFE!\appcache" >nul 2>nul
 if !errorlevel! equ 0 (
 echo OK!
 ) else (
