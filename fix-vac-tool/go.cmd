@@ -153,6 +153,7 @@ color 2f
 :: check if we have cscript.exe
 IF NOT EXIST "%SystemRoot%\System32\cscript.exe" set cscript="%~dp0\cscript.exe"
 set cscript=%SystemRoot%\System32\cscript.exe
+echo     ------     Tip：网吧用户请尽量安装Steam和游戏到C盘         ------
 echo     ------请在弹出的选项框寻找到 Steam.exe 所在的目录并点击确定------
 echo     ------              直接点击 取消 则退出                   ------
 echo       例如：优盘盘符为 X，其中有Steam 文件夹，文件夹内有 Steam.exe
@@ -266,7 +267,7 @@ color 3f
 echo ----- 一般来说 WinXP 不会出问题，本工具不支持 WinXP 系统
 echo ----- 请使用 Win 7 及以上版本系统！
 pause & break
-goto :RUN
+exit
 
 :UNKNOWNOS
 cls
@@ -274,7 +275,7 @@ color 3f
 echo ----- 未知操作系统，本工具的修复效果未知
 echo ----- 请使用 Win 7 及以上版本系统！
 pause & break
-goto :RUN
+exit
 
 :TERMINATE
 cls
