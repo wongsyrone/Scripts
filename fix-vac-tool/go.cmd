@@ -36,6 +36,7 @@ ver|find /i "5.1" >nul && set osver=WinXP
 ver|find /i "6.1" >nul && set osver=Win7
 ver|find /i "6.2" >nul && set osver=Win8
 ver|find /i "6.3" >nul && set osver=Win8.1
+ver|find /i "10." >nul && set osver=Win10
 
 if /I "%osver%"=="WinXP" goto :NOXP
 if /I "%osver%"=="" goto :UNKNOWNOS
