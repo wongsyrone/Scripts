@@ -14,4 +14,5 @@
 * autoproxy20131215.xpi  --> 好吧，不是脚本，是Firefox修复版本（普通Logo）的Autoproxy.
 * fix-vac-tool/ 文件夹  --> 【CRLF】自己写的解决 Steam 平台提示计算机屏蔽 VAC 的解决工具
 * adb-myself-toolkit/ 文件夹  --> 【CRLF】自用的 ADB 工具
+* ocserv-no-route-generator/ 文件夹 --> 根据apnic的中国IPv4路由表自动生成ocserv（AnyConnect）可用的白名单 no-route 列表，参考[CNMan的ocserv-cn-no-route](https://github.com/CNMan/ocserv-cn-no-route)
 
