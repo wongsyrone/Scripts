@@ -64,17 +64,21 @@ sortandmerge() {
   exit 1
 }
 
+# are we running the 1st time?
+[ -f chnroute-origin.txt ] && {
+  cp -f chnroute-origin.txt chnroute.txt
+}
+
 # get latest China IP range
 [ -f chnroute.txt ] || {
   echo "no chnroute.txt, downloading..."
   curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > chnroute.txt
+  # backup
+  cp -f chnroute.txt chnroute-origin.txt
 }
 
 # remove previous generated files
 rm -f chnroute-1st.txt chnroute-2nd.txt chnroute-2nd-private-ip.txt chnroute-oc*.{conf,txt}
-
-# backup
-cp -f chnroute.txt chnroute-origin.txt
 
 # merge 1st time
 sortandmerge chnroute.txt chnroute-1st.txt
