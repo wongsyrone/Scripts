@@ -13,8 +13,7 @@ cd $SCRIPTDIR
 
 # cidr to netmask
 # $1: number of cidr, from 1 to 32
-_cidr2netmask()
-{ 
+_cidr2netmask() {
         local cidr="$1" netmask="" done=0 i=0 sum=0 cur=128 
         local octets= frac= 
 
@@ -44,6 +43,13 @@ _cidr2netmask()
         echo "${netmask#.*}" 
 }
 
+cidr2netmask() {
+for z in $( seq 1 32 )
+do
+  tmpnetmask=$(_cidr2netmask z)
+  perl -i -pe "s|/$z$|/$tmpnetmask|g" "$1"
+done
+}
 # $1: input file
 # $2: output file
 sortandmerge() {
@@ -64,6 +70,9 @@ sortandmerge() {
   curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > chnroute.txt
 }
 
+# remove previous generated files
+rm -f chnroute-1st.txt chnroute-2nd.txt chnroute-2nd-private-ip.txt chnroute-oc*.{conf,txt}
+
 # backup
 cp -f chnroute.txt chnroute-origin.txt
 
@@ -82,23 +91,87 @@ sortandmerge chnroute-tmp.txt chnroute-2nd.txt
 
 rm -f chnroute-tmp.txt
 
-#change to netmask
-cp -f chnroute-2nd.txt chnroute-ocserv.txt
-echo "you can modify chnroute-ocserv.txt now, then press any key to continue.."
-echo "i.e. remove private IP range from chnroute-ocserv.txt"
-read
-cp -f chnroute-ocserv.txt chnroute-tmp2.txt
-# merge 3rd time if any change has been made
-sortandmerge chnroute-tmp2.txt chnroute-ocserv.txt
-
+#get known ip block more accurate
+cp -f chnroute-2nd.txt chnroute-tmp2.txt
+sed -i "/192.160.0.0\/11/d" chnroute-tmp2.txt
+cat >> chnroute-tmp2.txt <<'EOF'
+192.160.0.0/13
+192.169.0.0/16
+192.170.0.0/15
+192.172.0.0/14
+192.176.0.0/12
+EOF
+sed -i "/203.0.0.0\/9/d" chnroute-tmp2.txt
+cat >> chnroute-tmp2.txt <<'EOF'
+203.0.0.0/18
+203.0.64.0/19
+203.0.96.0/20
+203.0.112.0/24
+203.0.114.0/23
+203.0.116.0/22
+203.0.120.0/21
+203.0.128.0/17
+203.1.0.0/16
+203.2.0.0/15
+203.4.0.0/14
+203.8.0.0/13
+203.16.0.0/12
+203.32.0.0/11
+203.64.0.0/10
+EOF
+sortandmerge chnroute-tmp2.txt chnroute-2nd.txt
 rm -f chnroute-tmp2.txt
 
-for k in $( seq 1 32 )
-do
-  tmpnetmask=$(_cidr2netmask k)
-  perl -i -pe "s|/$k$|/$tmpnetmask|g" chnroute-ocserv.txt
-done
+cp -f chnroute-2nd.txt chnroute-mod.txt
+echo "you can modify chnroute-mod.txt now, then press any key to continue.."
+echo "i.e. remove private IP range from chnroute-mod.txt"
+echo "192.168.0.0/16 and 203.0.113.0/24 already removed from chnroute-mod.txt"
+read
+cp -f chnroute-mod.txt chnroute-tmp3.txt
+# merge 3rd time if any change has been made
+sortandmerge chnroute-tmp3.txt chnroute-2nd.txt
+
+rm -f chnroute-tmp3.txt chnroute-mod.txt
+
+echo -n "Do you want to add Reserved IP block? Default is no [y/n]:"
+read answer
+case "$answer" in
+  y|Y|yes|Yes|YeS|yEs|YES)
+  cp -f chnroute-2nd.txt chnroute-tmp4.txt
+  cat >> chnroute-tmp4.txt <<'EOF'
+0.0.0.0/8
+10.0.0.0/8
+100.64.0.0/10
+127.0.0.0/8
+169.254.0.0/16
+172.16.0.0/12
+192.0.0.0/24
+192.0.2.0/24
+192.88.99.0/24
+192.168.0.0/16
+198.18.0.0/15
+198.51.100.0/24
+203.0.113.0/24
+224.0.0.0/4
+240.0.0.0/4
+255.255.255.255/32
+EOF
+  sortandmerge chnroute-tmp4.txt chnroute-2nd-private-ip.txt
+  cidr2netmask chnroute-2nd-private-ip.txt
+  rm -f chnroute-tmp4.txt
+  echo "Reserved IP block appending success!"
+  ;;
+  *)
+  echo "Reserved IP block appending skipped!"
+  ;;
+esac
 
 # add ocserv leading no-route entry to conf file
-cp -f chnroute-ocserv.txt chnroute-ocserv-no-route.conf
-perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route.conf
+cp -f chnroute-2nd.txt chnroute-ocserv-no-route-no-private-ip.conf
+cidr2netmask chnroute-ocserv-no-route-no-private-ip.conf
+perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route-no-private-ip.conf
+
+[ -f chnroute-2nd-private-ip.txt ] && {
+cp -f chnroute-2nd-private-ip.txt chnroute-ocserv-no-route-private-ip.conf
+perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route-private-ip.conf
+}
