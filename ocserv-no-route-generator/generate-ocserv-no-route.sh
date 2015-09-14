@@ -50,12 +50,14 @@ do
   perl -i -pe "s|/$z$|/$tmpnetmask|g" "$1"
 done
 }
+
+# use '.' as sort seperator
 # $1: input file
 # $2: output file
 sortandmerge() {
-  sort -u "$1" -o "$1"
+  sort -u -t"." -k1,1n -k2,2n -k3,3n -k4,4n "$1" -o "$1"
   perl ./merge-cidr.pl "$1" > "$2"
-  sort -u "$2" -o "$2"
+  sort -u -t"." -k1,1n -k2,2n -k3,3n -k4,4n "$2" -o "$2"
 }
 
 # is script exists
@@ -161,7 +163,6 @@ case "$answer" in
 255.255.255.255/32
 EOF
   sortandmerge chnroute-tmp4.txt chnroute-2nd-private-ip.txt
-  cidr2netmask chnroute-2nd-private-ip.txt
   rm -f chnroute-tmp4.txt
   echo "Reserved IP block appending success!"
   ;;
@@ -176,6 +177,7 @@ cidr2netmask chnroute-ocserv-no-route-no-private-ip.conf
 perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route-no-private-ip.conf
 
 [ -f chnroute-2nd-private-ip.txt ] && {
-cp -f chnroute-2nd-private-ip.txt chnroute-ocserv-no-route-private-ip.conf
-perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route-private-ip.conf
+  cp -f chnroute-2nd-private-ip.txt chnroute-ocserv-no-route-private-ip.conf
+  cidr2netmask chnroute-ocserv-no-route-private-ip.conf
+  perl -i -pe "s|^|no-route = |g" chnroute-ocserv-no-route-private-ip.conf
 }
